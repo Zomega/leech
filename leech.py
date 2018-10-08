@@ -12,6 +12,7 @@ from functools import reduce
 
 import sites
 import ebook
+import config
 
 __version__ = 2
 USER_AGENT = 'Leech/%s +http://davidlynch.org' % __version__
@@ -50,21 +51,6 @@ def create_session(cache):
     return session
 
 
-def load_on_disk_options(site):
-    try:
-        with open('leech.json') as store_file:
-            store = json.load(store_file)
-            login = store.get('logins', {}).get(site.__name__, False)
-            configured_site_options = store.get('site_options', {}).get(site.__name__, {})
-            cover_options = store.get('cover', {})
-    except FileNotFoundError:
-        logger.info("Unable to locate leech.json. Continuing assuming it does not exist.")
-        login = False
-        configured_site_options = {}
-        cover_options = {}
-    return configured_site_options, login, cover_options
-
-
 def create_options(site, site_options, unused_flags):
     """Compiles options provided from multiple different sources
     (e.g. on disk, via flags, via defaults, via JSON provided as a flag value)
@@ -73,7 +59,9 @@ def create_options(site, site_options, unused_flags):
 
     flag_specified_site_options = site.interpret_site_specific_options(**unused_flags)
 
-    configured_site_options, login, cover_options = load_on_disk_options(site)
+    configured_site_options = config.get_configured_site_options(site)
+    login = config.get_login(site)
+    cover_options = config.get_cover_options()
 
     overridden_site_options = json.loads(site_options)
 
@@ -86,7 +74,7 @@ def create_options(site, site_options, unused_flags):
         list(flag_specified_site_options.items()) +
         list(cover_options.items())
     )
-    return options, login
+    return options
 
 
 def open_story(site, url, session, login, options):
@@ -146,7 +134,8 @@ def download(url, site_options, cache, verbose, **other_flags):
     session = create_session(cache)
 
     site, url = sites.get(url)
-    options, login = create_options(site, site_options, other_flags)
+    options = create_options(site, site_options, other_flags)
+    login = config.get_login(site)
     story = open_story(site, url, session, login, options)
 
     filename = ebook.generate_epub(story, options)
