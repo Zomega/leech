@@ -81,6 +81,9 @@ class FanFictionNet(Site):
 
         return text.prettify()
 
+    def login(self, login_details):
+        raise NotImplementedError("Logins not supported for FF.net sites.")
+
 
 @register
 class FictionPress(FanFictionNet):

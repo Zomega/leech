@@ -70,6 +70,9 @@ class RoyalRoad(Site):
 
         return content, updated
 
+    def login(self, login_details):
+        raise NotImplementedError("Logins not supported for RoyalRoad sites.")
+
 
 @register
 class RoyalRoadL(RoyalRoad):

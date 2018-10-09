@@ -78,6 +78,9 @@ class FictionLive(Site):
 
         return story
 
+    def login(self, login_details):
+        raise NotImplementedError("Logins not supported for FictionLive sites.")
+
 
 # Stolen from the itertools docs
 def contextiterate(iterable):

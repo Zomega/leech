@@ -95,6 +95,9 @@ class Arbitrary(Site):
 
         return story
 
+    def login(self, login_details):
+        raise NotImplementedError("Logins not supported for arbitrary sites.")
+
     def _chapter(self, url, definition, title=False):
         logger.info("Extracting chapter @ %s", url)
         soup = self._soup(url)

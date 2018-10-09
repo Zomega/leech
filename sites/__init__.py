@@ -7,6 +7,7 @@ import time
 import logging
 import attr
 from bs4 import BeautifulSoup
+from abc import ABC, abstractmethod
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -62,7 +63,7 @@ class Section:
 
 
 @attr.s
-class Site:
+class Site(ABC):
     """A Site handles checking whether a URL might represent a site, and then
     extracting the content of a story from said site.
     """
@@ -73,8 +74,8 @@ class Site:
         True
     ))
 
-    @staticmethod
-    def get_site_specific_option_defs():
+    @classmethod
+    def get_site_specific_option_defs(cls):
         """Returns a list of click.option objects to add to CLI commands.
 
         It is best practice to ensure that these names are reasonably unique
@@ -106,10 +107,12 @@ class Site:
                 options[option.name] = option_value
         return options
 
-    @staticmethod
-    def matches(url):
+    @classmethod
+    @abstractmethod
+    def matches(cls, url):
         raise NotImplementedError()
 
+    @abstractmethod
     def extract(self, url):
         """Download a story from a given URL
 
@@ -121,10 +124,11 @@ class Site:
                 author (string)
                 chapters (list): list of Chapters (namedtuple, defined above)
         """
-        raise NotImplementedError()
+        pass
 
+    @abstractmethod
     def login(self, login_details):
-        raise NotImplementedError()
+        pass
 
     def _soup(self, url, method='html5lib', retry=3, retry_delay=10, **kw):
         page = self.session.get(url, **kw)
@@ -238,6 +242,7 @@ def list_site_specific_options():
 # And now, a particularly hacky take on a plugin system:
 # Make an __all__ out of all the python files in this directory that don't start
 # with __. Then import * them.
+# TODO(woursler): Pluggy-based system instead?
 
 modules = glob.glob(os.path.join(os.path.dirname(__file__), "*.py"))
 __all__ = [os.path.basename(f)[:-3] for f in modules if not f.startswith("__")]
