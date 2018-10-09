@@ -60,7 +60,6 @@ def create_options(site, site_options, unused_flags):
     flag_specified_site_options = site.interpret_site_specific_options(**unused_flags)
 
     configured_site_options = config.get_configured_site_options(site)
-    login = config.get_login(site)
     cover_options = config.get_cover_options()
 
     overridden_site_options = json.loads(site_options)
@@ -104,7 +103,7 @@ def cli():
 
 
 @cli.command()
-@click.option('--verbose', '-v', is_flag=True, help="verbose output")
+@click.option('--verbose', '-v', is_flag=True, help="Verbose debugging output")
 def flush(verbose):
     """Flushes the contents of the cache."""
     configure_logging(verbose)
